@@ -30,9 +30,9 @@ model = Extractor()
 # Loop through data.
 pbar = tqdm(total=len(data.data))
 for video in data.data:
-
     # Get the path to the sequence for this video.
-    path = './data/sequences-ucf/' + video[2] + '-' + str(seq_length) + \
+    #path = './data/sequences-ucf/' + video[2] + '-' + str(seq_length) + \
+    path = './data/sequences/' + video[0] + '/' + video[1] + '/' + video[2] + '-' + str(seq_length) + \
         '-features.txt'
 
     # Check if we already have it.
@@ -53,6 +53,9 @@ for video in data.data:
         sequence.append(features)
 
     # Save the sequence.
+    if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
+
     np.savetxt(path, sequence)
 
     pbar.update(1)

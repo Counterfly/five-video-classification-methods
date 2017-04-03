@@ -11,7 +11,7 @@ def train(data_type, seq_length, model, saved_model=None,
           load_to_memory=False):
     # Set variables.
     nb_epoch = 1000
-    batch_size = 32
+    batch_size = 2
 
     # Helper: Save the model.
     checkpointer = ModelCheckpoint(
@@ -21,7 +21,7 @@ def train(data_type, seq_length, model, saved_model=None,
         save_best_only=True)
 
     # Helper: TensorBoard
-    tb = TensorBoard(log_dir='./data/logs')
+    #tb = TensorBoard(log_dir='./data/logs')
 
     # Helper: Stop when we stop learning.
     early_stopper = EarlyStopping(patience=10)
@@ -46,7 +46,7 @@ def train(data_type, seq_length, model, saved_model=None,
 
     # Get samples per epoch.
     # Multiply by 0.7 to attempt to guess how much of data.data is the train set.
-    samples_per_epoch = ((len(data.data) * 0.7) // batch_size) * batch_size
+    batches_per_epoch = 10
 
     if load_to_memory:
         # Get data.
@@ -69,17 +69,20 @@ def train(data_type, seq_length, model, saved_model=None,
             batch_size=batch_size,
             validation_data=(X_test, y_test),
             verbose=1,
-            callbacks=[checkpointer, tb, early_stopper, csv_logger],
-            nb_epoch=nb_epoch,
-            samples_per_epoch=samples_per_epoch)
+            #callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            callbacks=[checkpointer, early_stopper, csv_logger],
+            epochs=nb_epoch)
+            #samples_per_epoch=samples_per_epoch)
     else:
         # Use fit generator.
+        # There seems to be a memory leak using Tensorflow backend
         rm.model.fit_generator(
             generator=generator,
-            samples_per_epoch=samples_per_epoch,
-            nb_epoch=nb_epoch,
+            steps_per_epoch=batches_per_epoch,
+            epochs=nb_epoch,
             verbose=1,
-            callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            #callbacks=[checkpointer, tb, early_stopper, csv_logger],
+            callbacks=[checkpointer, early_stopper, csv_logger],
             validation_data=val_generator,
             nb_val_samples=256)
 
@@ -90,7 +93,7 @@ def main():
     saved_model = None  # None or weights file
     class_limit = None  # int, can be 1-101 or None
     seq_length = 40
-    load_to_memory = True  # pre-load the sequences into memory
+    load_to_memory = False  # pre-load the sequences into memory
 
     # Chose images or features and image shape based on network.
     if model == 'conv_3d' or model == 'crnn':

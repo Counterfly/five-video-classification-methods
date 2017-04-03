@@ -54,6 +54,8 @@ class DataSet():
                     and item[1] in self.classes:
                 data_clean.append(item)
 
+        print "clean data = "
+        print data_clean[0]
         return data_clean
 
     def get_classes(self):
@@ -110,7 +112,7 @@ class DataSet():
         X, y = [], []
         for row in data:
 
-            sequence = self.get_extracted_sequence(data_type, row)
+            sequence = self.get_extracted_sequence(row)
 
             if sequence is None:
                 print("Can't find sequence. Did you generate them?")
@@ -132,6 +134,7 @@ class DataSet():
 
         data_type: 'features', 'images'
         """
+        print "====---===="
         # Get the right dataset for the generator.
         train, test = self.split_train_test()
         data = train if train_test == 'train' else test
@@ -181,8 +184,12 @@ class DataSet():
 
     def get_extracted_sequence(self, sample):
         """Get the saved extracted features."""
+        data_type = sample[0]   # test/train
+        group = sample[1]       # action in video (jogging, etc)
         filename = sample[2]
-        path = self.sequence_path + filename + '-' + str(self.seq_length) + \
+        #path = self.sequence_path + filename + '-' + str(self.seq_length) + \
+        #    '-features.txt'
+        path = self.sequence_path + data_type + '/' + group + '/' + filename + '-' + str(self.seq_length) + \
             '-features.txt'
         if os.path.isfile(path):
             # Use a dataframe/read_csv for speed increase over numpy.

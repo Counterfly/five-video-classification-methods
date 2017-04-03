@@ -28,11 +28,17 @@ def extract_files():
     folders = ['./train/', './test/']
 
     for folder in folders:
-        class_folders = glob.glob(folder + '*')
+        #class_folders = glob.glob(folder + '*')
+        class_folders = glob.glob(folder + 'YoYo*')
+        class_folders += glob.glob(folder + 'WritingOnB*')
+
+
+        # TODO: only extract files based on which train/test version doing
 
         for vid_class in class_folders:
             class_files = glob.glob(vid_class + '/*.avi')
 
+            print vid_class, class_files
             for video_path in class_files:
                 # Get the parts of the file.
                 video_parts = get_video_parts(video_path)
@@ -47,6 +53,7 @@ def extract_files():
                         filename
                     dest = train_or_test + '/' + classname + '/' + \
                         filename_no_ext + '-%04d.jpg'
+                    print 'running ffmpeg: ' + src + ' to ' + dest
                     call(["ffmpeg", "-i", src, dest])
 
                 # Now get how many frames it is.
